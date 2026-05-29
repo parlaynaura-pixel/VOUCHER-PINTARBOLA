@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>VOUCHER LUCKYSPIN - PINTARBOLA</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/winwheel@1.0.1/dist/Winwheel.min.js"></script>
+
+<style>
+
+body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    background-image:url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhigk-kspisGgIIxdfITy43Keu-J3ftXzSRc4SnGH10VBe_meALUnPGmbx-P0jxV7oOW3vdyry_ZHg_8IsvDylucGHMmbRQfqiNKWqw8QMKfnD76qkZstXbiqzGDq4WDHj9jrEWumP3O7ckw7PFWF90py-zylMSXT7FeO4mAZAAczlasSCzYni6Ngl5CGxv/s320/green-gift-box-with-bow_1410957-37335.jpg');
+    background-size:cover;
+    background-position:center;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial;
+}
+
+.box-spin{
+    background: rgba(0, 0, 0, 0.3);
+    border-radius:20px;
+    padding:30px;
+    width:95%;
+    max-width:900px;
+}
+
+.gradient-border{
+    position:relative;
+    border:5px solid gold;
+    border-radius:20px;
+    padding:20px;
+    background: rgba(0, 0, 0, 0.3);
+    display:inline-block;
+}
+
+#myCanvas{max-width:100%;}
+
+.pointer{
+    width:0;height:0;
+    border-left:25px solid transparent;
+    border-right:25px solid transparent;
+    border-top:50px solid red;
+    position:absolute;
+    top:-5px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:999;
+}
+
+.popup-win{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,0.8);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.popup-content{
+    background:#111;
+    border:3px solid gold;
+    border-radius:20px;
+    padding:40px;
+    text-align:center;
+    color:#fff;
+    width:90%;
+    max-width:500px;
+}
+
+.popup-content h1{color:gold;font-size:35px;}
+.popup-content p{font-size:22px;}
+
+.claim-btn{
+    background:green;
+    border:none;
+    padding:15px 35px;
+    font-weight:bold;
+    cursor:pointer;
+    border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid box-spin">
+
+<h1 class="text-white text-center mb-4">𝐕𝐎𝐔𝐂𝐇𝐄𝐑 𝐋𝐔𝐂𝐊𝐘𝐒𝐏𝐈𝐍 - 𝐏𝐈𝐍𝐓𝐀𝐑𝐁𝐎𝐋𝐀</h1>
+
+<div class="row align-items-center">
+
+<div class="col-lg-7 text-center">
+
+<div class="gradient-border">
+<div class="pointer"></div>
+<canvas id="myCanvas" width="500" height="500"></canvas>
+</div>
+
+<button id="spinBtn" onclick="YukSpin()" class="btn btn-warning btn-lg mt-4 w-50">
+SPIN SEKARANG
+</button>
+
+</div>
+
+<div class="col-lg-5 text-center">
+
+<h3 class="text-warning">MASUKAN VOUCHER</h3>
+
+<input type="text" id="kodeVoucher" class="form-control text-center" style="text-transform:uppercase">
+
+</div>
+
+</div>
+</div>
+
+<!-- POPUP -->
+<div class="popup-win" id="popupWin">
+<div class="popup-content">
+<h1>🎉 SELAMAT 🎉</h1>
+<p id="hadiahText"></p>
+<button class="claim-btn" onclick="claimHadiah()">CLAIM</button>
+</div>
+</div>
+
+<!-- AUDIO -->
+<audio id="spinSound" src="https://assets.mixkit.co/active_storage/sfx/2766/2766-preview.mp3"></audio>
+<audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+<audio id="bgMusic" src="https://image2url.com/r2/default/audio/1771781836028-a0e1245f-b4c6-44fc-900d-4b0230b3309f.mp3" loop></audio>
+
+<script>
+
+// =====================
+// MUSIC AUTO START FIX
+// =====================
+const bgMusic = document.getElementById("bgMusic");
+const spinSound = document.getElementById("spinSound");
+const winSound = document.getElementById("winSound");
+
+let musicStarted = false;
+
+function startMusicOnce(){
+    if(musicStarted) return;
+    musicStarted = true;
+
+    bgMusic.volume = 0.4;
+    bgMusic.play().catch(()=>{});
+}
+
+document.addEventListener("click", startMusicOnce);
+document.addEventListener("touchstart", startMusicOnce);
+
+// =====================
+// VOUCHER
+// =====================
+let daftarVoucher = ["BNSPINTAR2JT","BONUSJUNI","SPIN2026","VIPJUNI"];
+
+let voucherAktif = "";
+let hadiahMenang = "";
+
+// =====================
+// WHEEL
+// =====================
+let theWheel = new Winwheel({
+    canvasId:'myCanvas',
+    numSegments:8,
+    outerRadius:220,
+    innerRadius:70,
+    textFontSize:18,
+    segments:[
+        {fillStyle:'#EFBF04',text:'900.000'},
+        {fillStyle:'#EFBF04',text:'250.000'},
+        {fillStyle:'#EFBF04',text:'500.000'},
+        {fillStyle:'#EFBF04',text:'200.000'},
+        {fillStyle:'#EFBF04',text:'750.000'},
+        {fillStyle:'#EFBF04',text:'1.000.000'},
+        {fillStyle:'#EFBF04',text:'1.500.000'},
+        {fillStyle:'#EFBF04',text:'2.000.000'}
+    ],
+    animation:{
+        type:'spinToStop',
+        duration:5,
+        spins:8,
+        callbackSound: playSpinSound
+    }
+});
+
+function playSpinSound(){
+    spinSound.currentTime = 0;
+    spinSound.play();
+}
+
+function playWinSound(){
+    winSound.currentTime = 0;
+    winSound.play();
+}
+
+// =====================
+// SPIN
+// =====================
+function YukSpin(){
+
+    let kode = document.getElementById("kodeVoucher").value.trim().toUpperCase();
+
+    if(!kode){
+        alert("Masukan voucher!");
+        return;
+    }
+
+    if(!daftarVoucher.includes(kode)){
+        alert("Voucher tidak valid!");
+        return;
+    }
+
+    if(localStorage.getItem("voucher_"+kode)){
+        alert("Voucher sudah dipakai!");
+        return;
+    }
+
+    voucherAktif = kode;
+
+    document.getElementById("spinBtn").disabled = true;
+
+    let result = Math.floor(Math.random()*8)+1;
+    let stopAt = ((result-1)*45)+Math.floor(Math.random()*44);
+
+    theWheel.animation.stopAngle = stopAt;
+    theWheel.startAnimation();
+
+    localStorage.setItem("voucher_"+kode,"used");
+
+    setTimeout(()=>{
+        hadiahMenang = theWheel.getIndicatedSegment().text;
+
+        playWinSound();
+
+        document.getElementById("hadiahText").innerHTML =
+        "KAMU MENANG <br><br><span style='color:gold;font-size:30px'>Rp "+hadiahMenang+"</span>";
+
+        document.getElementById("popupWin").style.display="flex";
+
+    },6000);
+}
+
+// =====================
+// CLAIM
+// =====================
+function claimHadiah(){
+    window.location.href =
+    "https://pintarbola01.com?voucher="+voucherAktif+"&hadiah="+hadiahMenang;
+}
+
+// block right click
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
+</script>
+
+</body>
+</html>
