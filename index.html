@@ -37,7 +37,7 @@ body{
 
 .gradient-border{
     position:relative;
-    border:5px solid gold;
+    border:5px solid white;
     border-radius:20px;
     padding:20px;
     background: rgba(0, 0, 0, 0.3);
@@ -84,7 +84,7 @@ body{
 .popup-content p{font-size:22px;}
 
 .claim-btn{
-    background:green;
+    background:gold;
     border:none;
     padding:15px 35px;
     font-weight:bold;
@@ -99,7 +99,7 @@ body{
 
 <div class="container-fluid box-spin">
 
-<h1 class="text-white text-center mb-4">𝐕𝐎𝐔𝐂𝐇𝐄𝐑 𝐋𝐔𝐂𝐊𝐘𝐒𝐏𝐈𝐍 - 𝐏𝐈𝐍𝐓𝐀𝐑𝐁𝐎𝐋𝐀</h1>
+<h1 class="text-white text-center mb-4">𝐕𝐎𝐔𝐂𝐇𝐄𝐑 𝐋𝐔𝐂𝐊𝐘𝐒𝐏𝐈𝐍 - 𝐏𝐀𝐑𝐋𝐀𝐘𝟑𝟖𝟖</h1>
 
 <div class="row align-items-center">
 
@@ -118,9 +118,55 @@ SPIN SEKARANG
 
 <div class="col-lg-5 text-center">
 
+<h3 class="text-warning">USERNAME</h3>
+
+<input
+type="text"
+id="username"
+class="form-control text-center mb-3"
+placeholder="Masukan Username">
+
 <h3 class="text-warning">MASUKAN VOUCHER</h3>
 
-<input type="text" id="kodeVoucher" class="form-control text-center" style="text-transform:uppercase">
+<input
+type="text"
+id="kodeVoucher"
+class="form-control text-center"
+style="text-transform:uppercase"
+placeholder="Masukan Voucher">
+
+</div>
+
+<div id="history" style="
+margin-top:20px;
+background:rgba(0,0,0,0.6);
+padding:15px;
+border-radius:15px;
+border:2px solid gold;
+color:white;
+max-height:250px;
+overflow-y:auto;
+text-align:left;
+">
+
+<h3 style="color:gold;text-align:center;">
+📜 50 Riwayat Spin Terakhir
+</h3>
+
+<ul id="historyList" style="list-style:none;padding-left:0;">
+
+<li>🪙 <b>T****P</b> mendapatkan <b>IDR 900.000</b></li>
+<li>🪙 <b>O****5</b> mendapatkan <b>IDR 1.500.000</b></li>
+<li>🪙 <b>Z****6</b> mendapatkan <b>IDR 200.000</b></li>
+<li>🪙 <b>L****U</b> mendapatkan <b>IDR 500.000</b></li>
+<li>🪙 <b>A****D</b> mendapatkan <b>IDR 750.000</b></li>
+<li>🪙 <b>T****8</b> mendapatkan <b>IDR 750.000</b></li>
+<li>🪙 <b>E****5</b> mendapatkan <b>IDR 1.000.000</b></li>
+<li>🪙 <b>F****I</b> mendapatkan <b>IDR 900.000</b></li>
+<li>🪙 <b>Q****V</b> mendapatkan <b>IDR 500.000</b></li>
+<li>🪙 <b>K****Z</b> mendapatkan <b>IDR 2.000.000</b></li>
+
+</ul>
 
 </div>
 
@@ -171,6 +217,7 @@ let daftarVoucher = ["BNSPINTAR2JT","BONUSJUNI","SPIN2026","VIPJUNI"];
 
 let voucherAktif = "";
 let hadiahMenang = "";
+let usernameAktif = "";
 
 // =====================
 // WHEEL
@@ -182,14 +229,14 @@ let theWheel = new Winwheel({
     innerRadius:70,
     textFontSize:18,
     segments:[
-        {fillStyle:'#EFBF04',text:'900.000'},
-        {fillStyle:'#EFBF04',text:'250.000'},
-        {fillStyle:'#EFBF04',text:'500.000'},
-        {fillStyle:'#EFBF04',text:'200.000'},
-        {fillStyle:'#EFBF04',text:'750.000'},
-        {fillStyle:'#EFBF04',text:'1.000.000'},
-        {fillStyle:'#EFBF04',text:'1.500.000'},
-        {fillStyle:'#EFBF04',text:'2.000.000'}
+        {fillStyle:'#f79d1e',text:'900.000'},
+        {fillStyle:'#f79d1e',text:'250.000'},
+        {fillStyle:'#f79d1e',text:'500.000'},
+        {fillStyle:'#f79d1e',text:'200.000'},
+        {fillStyle:'#f79d1e',text:'750.000'},
+        {fillStyle:'#f79d1e',text:'1.000.000'},
+        {fillStyle:'#f79d1e',text:'1.500.000'},
+        {fillStyle:'#f79d1e',text:'2.000.000'}
     ],
     animation:{
         type:'spinToStop',
@@ -208,16 +255,32 @@ function playWinSound(){
     winSound.currentTime = 0;
     winSound.play();
 }
+function maskUsername(username){
 
+    if(username.length <= 2){
+        return username;
+    }
+
+    return username.charAt(0) +
+           "****" +
+           username.charAt(username.length - 1);
+}
 // =====================
 // SPIN
 // =====================
 function YukSpin(){
 
+    let username = document.getElementById("username").value.trim();
+
     let kode = document.getElementById("kodeVoucher").value.trim().toUpperCase();
 
-    if(!kode){
-        alert("Masukan voucher!");
+    if(username === ""){
+        alert("Masukan Username!");
+        return;
+    }
+
+    if(kode === ""){
+        alert("Masukan Voucher!");
         return;
     }
 
@@ -232,6 +295,7 @@ function YukSpin(){
     }
 
     voucherAktif = kode;
+	usernameAktif = username;
 
     document.getElementById("spinBtn").disabled = true;
 
@@ -245,7 +309,23 @@ function YukSpin(){
 
     setTimeout(()=>{
         hadiahMenang = theWheel.getIndicatedSegment().text;
+let riwayat = document.getElementById("historyList");
 
+if(riwayat){
+
+    let userMask = maskUsername(usernameAktif);
+
+    let item = document.createElement("li");
+
+    item.innerHTML =
+    "🪙 <b>" +
+    userMask +
+    "</b> mendapatkan hadiah <b>IDR " +
+    hadiahMenang +
+    "</b>";
+
+    riwayat.insertBefore(item, riwayat.firstChild);
+}
         playWinSound();
 
         document.getElementById("hadiahText").innerHTML =
